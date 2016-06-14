@@ -2,33 +2,34 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="50dp"
-              android:orientation="vertical"
-              android:background="@color/dark_grey">
+              android:background="@color/dark_grey"
+              android:orientation="vertical">
 
     <LinearLayout
-        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="48dp">
+        android:layout_height="48dp"
+        android:background="?android:attr/activatedBackgroundIndicator"
+        android:orientation="horizontal">
+
 
         <view
+            android:id="@+id/row_tab"
             class="android.view.View"
             android:layout_width="10dp"
             android:layout_height="match_parent"
-            android:id="@+id/row_tab"
             android:background="@color/green"/>
 
         <TextView
+            android:id="@+id/row_text"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="Reminder Text"
-            android:id="@+id/row_text"
-            android:textSize="20sp"
-            android:gravity="center_vertical"
-            android:padding="10dp"
             android:ellipsize="end"
+            android:gravity="center_vertical"
             android:maxLines="1"
-            android:textColor="@color/white"/>
+            android:padding="10dp"
+            android:text="Reminder Text"
+            android:textColor="@color/white"
+            android:textSize="18sp"/>
     </LinearLayout>
 
     <view
