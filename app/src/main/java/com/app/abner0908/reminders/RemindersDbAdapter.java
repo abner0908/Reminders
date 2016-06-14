@@ -46,9 +46,9 @@ public class RemindersDbAdapter {
         }
     }
 
-    public void createReminer(String name, boolean important) {
+    public void createReminder(String content, boolean important) {
         ContentValues values = new ContentValues();
-        values.put(COL_CONTENT, name);
+        values.put(COL_CONTENT, content);
         values.put(COL_IMPORTANT, important ? 1 : 0);
         mDb.insert(TABLE_NAME, null, values);
     }
