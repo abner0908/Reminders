@@ -1,6 +1,7 @@
 package com.app.abner0908.reminders;
 
 import android.app.Dialog;
+import android.app.TimePickerDialog;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
@@ -21,6 +22,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import java.util.Date;
 
 public class RemindersActivity extends AppCompatActivity {
     private ListView mListView;
@@ -60,7 +63,7 @@ public class RemindersActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, final int masterListPosition, long id) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(RemindersActivity.this);
                 ListView modeListView = new ListView(RemindersActivity.this);
-                String[] modes = new String[]{"Edit Reminder", "Delete Reminder"};
+                String[] modes = new String[]{"Edit Reminder", "Delete Reminder", "Schedule Reminder"};
                 ArrayAdapter<String> modeAdapter = new ArrayAdapter<>(RemindersActivity.this,
                         android.R.layout.simple_list_item_1, android.R.id.text1, modes);
                 modeListView.setAdapter(modeAdapter);
@@ -75,9 +78,12 @@ public class RemindersActivity extends AppCompatActivity {
                             int nId = getIdFromPosition(masterListPosition);
                             Reminder reminder = mDbAdapter.fetchReminderById(nId);
                             fireCustomDialog(reminder);
-                        } else {
+                        } else if (position == 1) {
                             mDbAdapter.deleteReminderById(getIdFromPosition(masterListPosition));
                             mCursorAdapter.changeCursor(mDbAdapter.fetchAllReminders());
+                        } else {
+                            Date today = new Date();
+                            new TimePickerDialog(RemindersActivity.this, null, today.getHours(), today.getMinutes(), false).show();
                         }
                         dialog.dismiss();
                     }
