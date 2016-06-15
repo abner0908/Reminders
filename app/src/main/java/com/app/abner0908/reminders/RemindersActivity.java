@@ -6,17 +6,21 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.Toast;
+import android.widget.TextView;
 
 public class RemindersActivity extends AppCompatActivity {
     private ListView mListView;
@@ -39,6 +43,7 @@ public class RemindersActivity extends AppCompatActivity {
             mDbAdapter.deleteAllReminders();
             insertSomeReminders();
         }
+
         Cursor cursor = mDbAdapter.fetchAllReminders();
         String[] from = new String[]{RemindersDbAdapter.COL_CONTENT};
         int[] to = new int[]{R.id.row_text};
@@ -67,11 +72,12 @@ public class RemindersActivity extends AppCompatActivity {
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                         if (position == 0) {
-                            Toast.makeText(RemindersActivity.this, "edit "
-                                    + masterListPosition, Toast.LENGTH_SHORT).show();
+                            int nId = getIdFromPosition(masterListPosition);
+                            Reminder reminder = mDbAdapter.fetchReminderById(nId);
+                            fireCustomDialog(reminder);
                         } else {
-                            Toast.makeText(RemindersActivity.this, "delete "
-                                    + masterListPosition, Toast.LENGTH_SHORT).show();
+                            mDbAdapter.deleteReminderById(getIdFromPosition(masterListPosition));
+                            mCursorAdapter.changeCursor(mDbAdapter.fetchAllReminders());
                         }
                         dialog.dismiss();
                     }
@@ -141,6 +147,51 @@ public class RemindersActivity extends AppCompatActivity {
         mDbAdapter.createReminder("Call the Dalai Lama back", true);
     }
 
+    private void fireCustomDialog(final Reminder reminder) {
+        final Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_custom);
+
+        TextView titleView = (TextView) dialog.findViewById(R.id.custom_title);
+        final EditText editCustom = (EditText) dialog.findViewById(R.id.custom_edit_reminder);
+        Button commitButton = (Button) dialog.findViewById(R.id.custom_button_commit);
+        Button cancelButton = (Button) dialog.findViewById(R.id.custom_button_cancel);
+        final CheckBox checkBox = (CheckBox) dialog.findViewById(R.id.custom_check_box);
+        LinearLayout rootLayout = (LinearLayout) dialog.findViewById(R.id.custom_root_layout);
+        final boolean isEditOperation = (reminder != null);
+
+        if (isEditOperation) {
+            titleView.setText("Edit Reminder");
+            checkBox.setChecked(reminder.getImportant() == 1);
+            editCustom.setText(reminder.getContent());
+            rootLayout.setBackgroundColor(getResources().getColor(R.color.light_blue));
+        }
+
+        commitButton.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String reminderText = editCustom.getText().toString();
+                if (isEditOperation) {
+                    Reminder reminderEdited = new Reminder(reminder.getId(),
+                            reminderText, checkBox.isChecked() ? 1 : 0);
+                    mDbAdapter.updateReminder(reminderEdited);
+                } else {
+                    mDbAdapter.createReminder(reminderText, checkBox.isChecked());
+                }
+                mCursorAdapter.changeCursor(mDbAdapter.fetchAllReminders());
+                dialog.dismiss();
+            }
+        });
+
+        cancelButton.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -154,12 +205,9 @@ public class RemindersActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.action_new:
                 //create new Reminder
-                //fireCustomDialog(null);
-                Log.d(getLocalClassName(), "create new Reminder");
+                fireCustomDialog(null);
                 return true;
             case R.id.action_about:
-                //create new Reminder
-                //fireAbooutDialog();
                 return true;
             case R.id.action_exit:
                 finish();
